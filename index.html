@@ -10,86 +10,64 @@
 
     <style>
         :root {
-            --bg: #000;
-            --card: #1C1C1E;
-            --accent: #FF9F0A;
-            --green: #30D158;
-            --red: #FF453A;
-            --blue: #0A84FF;
-            --text: #FFF;
-            --text-sec: #8E8E93;
+            --bg: #000; --card: #1C1C1E; --accent: #FF9F0A;
+            --green: #30D158; --red: #FF453A; --blue: #0A84FF;
+            --text: #FFF; --text-sec: #8E8E93;
         }
 
         body {
-            background-color: var(--bg);
-            color: var(--text);
+            background-color: var(--bg); color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0;
-            padding: env(safe-area-inset-top) 12px 20px 12px;
-            line-height: 1.2;
+            margin: 0; padding: env(safe-area-inset-top) 12px 20px 12px;
         }
 
         .container { max-width: 400px; margin: auto; }
-        h1 { text-align: center; color: var(--accent); font-size: 22px; margin: 8px 0; font-weight: 800; }
-
-        .month-selector {
-            width: 100%; background: var(--card); color: var(--accent); border: none;
-            padding: 10px; border-radius: 10px; font-size: 16px; font-weight: bold;
-            margin-bottom: 10px; text-align: center; -webkit-appearance: none;
-        }
-
-        .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
-        .tab {
-            flex: 1; padding: 10px; border-radius: 10px; border: none;
-            background: #2C2C2E; color: var(--text-sec); font-weight: bold; font-size: 13px;
-        }
-        .tab.active { background: var(--card); color: #FFF; border: 1px solid var(--accent); }
+        h1 { text-align: center; color: var(--accent); font-size: 20px; margin: 8px 0; font-weight: 800; }
 
         .card {
-            background: var(--card); padding: 12px 15px; border-radius: 15px;
+            background: var(--card); padding: 12px; border-radius: 15px;
             margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
         .stats-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center; }
-        .label { font-size: 9px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
-        .value-small { font-size: 17px; font-weight: 800; }
+        .label { font-size: 8px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 2px; }
+        .value-small { font-size: 15px; font-weight: 800; }
         
         .editable { border-bottom: 1px dashed #555; color: var(--accent); }
 
-        input {
+        /* FIX: Evita que el input se salga del cuadro */
+        input, select {
             width: 100%; box-sizing: border-box; background: #2C2C2E;
             border: 1px solid #3A3A3C; border-radius: 10px; color: #FFF;
-            padding: 12px; margin: 6px 0; font-size: 16px; outline: none;
+            padding: 12px; margin: 5px 0; font-size: 16px; outline: none;
+            display: block; -webkit-appearance: none;
         }
 
-        .btn-group { display: flex; gap: 8px; margin-top: 4px; }
+        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
         .main-btn {
             flex: 2; background: var(--accent); border: none;
-            padding: 14px; border-radius: 12px; font-weight: 800; font-size: 15px;
-            color: white;
+            padding: 14px; border-radius: 12px; font-weight: 800; color: white;
         }
         .descanso-btn {
             flex: 1; background: #2C2C2E; border: 1.5px solid var(--blue);
-            padding: 14px; border-radius: 12px; font-weight: 700; font-size: 12px;
-            color: var(--blue);
+            padding: 14px; border-radius: 12px; font-weight: 700; color: var(--blue);
         }
 
-        .progress-container {
-            height: 8px; background: #333; border-radius: 10px; margin: 10px 0; overflow: hidden;
+        .iva-btn {
+            width: 100%; background: #1c1c1e; border: 1px solid var(--green);
+            color: var(--green); padding: 12px; border-radius: 12px;
+            font-size: 12px; font-weight: bold; margin-top: 10px;
         }
-        .progress-bar {
-            height: 100%; 
-            background: linear-gradient(90deg, #FFD60A, var(--accent));
-            width: 0%; 
-            transition: width 1s ease-in-out;
-            border-radius: 10px;
-        }
-        .progress-bar.success { background: linear-gradient(90deg, #CEFFC9, var(--green)); }
+
+        .progress-container { height: 8px; background: #333; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #FFD60A, var(--accent)); width: 0%; transition: width 1s; }
+        
+        .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
+        .tab { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #2C2C2E; color: var(--text-sec); font-size: 12px; font-weight: bold;}
+        .tab.active { background: var(--card); color: #FFF; border: 1px solid var(--accent); }
 
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         td, th { padding: 10px 5px; border-bottom: 1px solid #333; }
-        .btn-del { color: var(--red); background: none; border: none; font-weight: 600; }
-
         .hidden { display: none; }
     </style>
 </head>
@@ -98,16 +76,9 @@
 <div class="container">
     <h1>Ventas 2026</h1>
 
-    <select id="mesSel" class="month-selector" onchange="actualizar()">
+    <select id="mesSel" onchange="actualizar()">
         <option value="2026-04">Abril 2026</option>
         <option value="2026-05">Mayo 2026</option>
-        <option value="2026-06">Junio 2026</option>
-        <option value="2026-07">Julio 2026</option>
-        <option value="2026-08">Agosto 2026</option>
-        <option value="2026-09">Septiembre 2026</option>
-        <option value="2026-10">Octubre 2026</option>
-        <option value="2026-11">Noviembre 2026</option>
-        <option value="2026-12">Diciembre 2026</option>
     </select>
 
     <div class="card stats-top">
@@ -116,12 +87,12 @@
             <div class="value-small editable">$<span id="metaTxt">0</span></div>
         </div>
         <div>
-            <div class="label">Venta Hoy</div>
-            <div class="value-small" id="v-hoy" style="color: var(--green)">$0</div>
+            <div class="label">Meta Diaria (26d)</div>
+            <div class="value-small" id="m-diaria" style="color: var(--accent)">$0</div>
         </div>
         <div>
-            <div class="label">Descansos</div>
-            <div class="value-small" id="descansosCount" style="color: var(--blue)">0</div>
+            <div class="label">Vendido Hoy</div>
+            <div class="value-small" id="v-hoy">$0</div>
         </div>
     </div>
 
@@ -132,10 +103,9 @@
 
     <div id="control">
         <div class="card">
-            <div class="label" style="text-align: center;">Fecha y Monto</div>
+            <div class="label" style="text-align: center;">Nueva Entrada</div>
             <input type="date" id="f-in">
-            <input type="number" id="v-in" placeholder="$ 0.00" inputmode="decimal">
-            
+            <input type="number" id="v-in" placeholder="Monto $" inputmode="decimal">
             <div class="btn-group">
                 <button class="descanso-btn" onclick="addDescanso()">Descanso</button>
                 <button class="main-btn" onclick="addVenta()">Guardar Venta</button>
@@ -145,11 +115,13 @@
         <div class="card">
             <div class="stats-top">
                 <div><div class="label">Logrado</div><div class="value-small" style="color:var(--green)">$<span id="total">0</span></div></div>
-                <div><div class="label">Restante</div><div class="value-small" id="restante">$0</div></div>
-                <div><div class="label">Progreso</div><div class="value-small" id="porc" style="color:var(--accent)">0%</div></div>
+                <div><div class="label">Faltante</div><div class="value-small" id="restante">$0</div></div>
+                <div><div class="label">Progreso</div><div class="value-small" id="porc">0%</div></div>
             </div>
             <div class="progress-container"><div class="progress-bar" id="barra"></div></div>
-            <div id="status" style="text-align:center; font-size: 11px; font-weight: bold; color: var(--text-sec); text-transform: uppercase;"></div>
+            <div id="status" style="text-align:center; font-size: 10px; font-weight: bold; color: var(--text-sec);"></div>
+            
+            <button class="iva-btn" onclick="mostrarSinIva()">CALCULAR TOTAL SIN IVA (16%)</button>
         </div>
     </div>
 
@@ -177,95 +149,82 @@
 
     function editarMeta() {
         let actual = localStorage.getItem(getClaveMeta()) || 42000;
-        let nueva = prompt("Meta mensual:", actual);
-        if (nueva && !isNaN(nueva)) { localStorage.setItem(getClaveMeta(), nueva); actualizar(); }
+        let nueva = prompt("Nueva meta mensual:", actual);
+        if (nueva) { localStorage.setItem(getClaveMeta(), nueva); actualizar(); }
     }
 
     function addVenta() {
         const f = document.getElementById('f-in').value;
         const v = parseFloat(document.getElementById('v-in').value);
-        if (!v || v <= 0 || !f) return;
+        if (!v || v <= 0) return;
         saveEntry({ id: Date.now(), f, v, tipo: 'venta' });
         document.getElementById('v-in').value = "";
     }
 
     function addDescanso() {
         const f = document.getElementById('f-in').value;
-        if (!f) return;
         saveEntry({ id: Date.now(), f, v: 0, tipo: 'descanso' });
     }
 
     function saveEntry(obj) {
-        const clave = "v26_" + obj.f.substring(0, 7);
-        let data = JSON.parse(localStorage.getItem(clave)) || [];
+        let data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
         data.push(obj);
-        localStorage.setItem(clave, JSON.stringify(data));
+        localStorage.setItem(getClaveVentas(), JSON.stringify(data));
         actualizar();
     }
 
     function borrar(id) {
-        if(!confirm("¿Borrar?")) return;
+        if(!confirm("¿Borrar registro?")) return;
         let data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
         data = data.filter(i => i.id !== id);
         localStorage.setItem(getClaveVentas(), JSON.stringify(data));
         actualizar();
     }
 
+    function mostrarSinIva() {
+        const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
+        const totalLogrado = data.reduce((acc, i) => acc + i.v, 0);
+        const sinIva = totalLogrado / 1.16;
+        alert("TOTAL LOGRADO: $" + totalLogrado.toLocaleString() + "\nSIN IVA (16%): $" + sinIva.toLocaleString(undefined, {minimumFractionDigits: 2}));
+    }
+
     function actualizar() {
-        const mesSel = document.getElementById('mesSel').value;
         const metaActual = parseFloat(localStorage.getItem(getClaveMeta())) || 42000;
         const hoyLocal = getFechaLocal();
-        
         document.getElementById('metaTxt').innerText = metaActual.toLocaleString();
 
         const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
         const totalLogrado = data.reduce((acc, i) => acc + i.v, 0);
         const rest = metaActual - totalLogrado;
         
+        // Lógica de 26 días laborables
+        const diasConVenta = new Set(data.filter(i => i.tipo === 'venta').map(i => i.f)).size;
+        const diasRestantes = Math.max(26 - diasConVenta, 1);
+
+        const metaDiaria = (rest > 0) ? Math.ceil(rest / diasRestantes) : 0;
+        document.getElementById('m-diaria').innerText = "$" + metaDiaria.toLocaleString();
+
         const vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + i.v, 0);
-        document.getElementById('v-hoy').innerText = "$" + vendidoHoy.toLocaleString();
-
-        const totalDescansos = data.filter(i => i.tipo === 'descanso').length;
-        document.getElementById('descansosCount').innerText = totalDescansos;
-
-        const añoMes = mesSel.split('-');
-        const ultimoDia = new Date(añoMes[0], añoMes[1], 0).getDate();
-        const diaHoyNum = parseInt(hoyLocal.split('-')[2]);
+        const esDescanso = data.some(i => i.f === hoyLocal && i.tipo === 'descanso');
+        const vHoyTxt = document.getElementById('v-hoy');
         
-        const descansosFuturos = data.filter(i => i.tipo === 'descanso' && i.f >= hoyLocal && i.f.startsWith(mesSel)).length;
-        
-        let diasDisponibles;
-        if(hoyLocal.startsWith(mesSel)) {
-            diasDisponibles = Math.max((ultimoDia - diaHoyNum) + 1 - descansosFuturos, 1);
-        } else {
-            diasDisponibles = ultimoDia - descansosFuturos;
-        }
+        vHoyTxt.innerText = esDescanso ? "DESC." : "$" + vendidoHoy.toLocaleString();
+        vHoyTxt.style.color = esDescanso || vendidoHoy >= metaDiaria ? "var(--green)" : "var(--red)";
 
-        const porcReal = (totalLogrado / metaActual) * 100;
-        document.getElementById('porc').innerText = porcReal.toFixed(1) + "%";
-        document.getElementById('barra').style.width = Math.min(porcReal, 100) + "%";
-
-        const barElement = document.getElementById('barra');
-        const st = document.getElementById('status');
-        
-        if (porcReal >= 100) {
-            barElement.classList.add('success');
-            st.innerText = "🏆 OBJETIVO SUPERADO";
-        } else {
-            barElement.classList.remove('success');
-            st.innerText = `Quedan ${diasDisponibles} días laborables`;
-        }
-
+        const porc = (totalLogrado / metaActual) * 100;
+        document.getElementById('porc').innerText = porc.toFixed(1) + "%";
+        document.getElementById('barra').style.width = Math.min(porc, 100) + "%";
         document.getElementById('total').innerText = totalLogrado.toLocaleString();
         document.getElementById('restante').innerText = "$" + (rest < 0 ? 0 : rest).toLocaleString();
+        document.getElementById('status').innerText = `Días de venta restantes: ${diasRestantes} de 26`;
 
         const tbody = document.querySelector('#tabla tbody');
         tbody.innerHTML = "";
         data.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
             tbody.innerHTML += `<tr>
                 <td>${i.f.split('-').reverse().slice(0,2).join('/')}</td>
-                <td>${i.tipo === 'descanso' ? 'DESC.' : '<b>$' + i.v.toLocaleString() + '</b>'}</td>
-                <td style="text-align:right"><button class="btn-del" onclick="borrar(${i.id})">X</button></td>
+                <td>${i.tipo === 'descanso' ? '<span style="color:var(--blue)">DESC.</span>' : '<b>$' + i.v.toLocaleString() + '</b>'}</td>
+                <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none;">X</button></td>
             </tr>`;
         });
     }
@@ -276,7 +235,6 @@
         document.getElementById('t-control').classList.toggle('active', t === 'control');
         document.getElementById('t-historial').classList.toggle('active', t === 'historial');
     }
-
     actualizar();
 </script>
 </body>
