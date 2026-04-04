@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Ventas 2026 PRO</title>
-    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Ventas 26">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/10384/10384160.png">
 
     <style>
@@ -27,83 +25,72 @@
             color: var(--text);
             font-family: -apple-system, BlinkMacSystemFont, sans-serif;
             margin: 0;
-            padding: env(safe-area-inset-top) 15px 40px 15px;
+            padding: env(safe-area-inset-top) 12px 20px 12px;
+            line-height: 1.2;
         }
 
         .container { max-width: 400px; margin: auto; }
-        h1 { text-align: center; color: var(--accent); font-size: 26px; margin: 10px 0; font-weight: 800; }
+        h1 { text-align: center; color: var(--accent); font-size: 22px; margin: 8px 0; font-weight: 800; }
 
         .month-selector {
             width: 100%; background: var(--card); color: var(--accent); border: none;
-            padding: 14px; border-radius: 12px; font-size: 17px; font-weight: bold;
-            margin-bottom: 12px; text-align: center; -webkit-appearance: none;
+            padding: 10px; border-radius: 10px; font-size: 16px; font-weight: bold;
+            margin-bottom: 10px; text-align: center; -webkit-appearance: none;
         }
 
-        .tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
         .tab {
-            flex: 1; padding: 12px; border-radius: 12px; border: none;
-            background: #2C2C2E; color: var(--text-sec); font-weight: bold; font-size: 14px;
+            flex: 1; padding: 10px; border-radius: 10px; border: none;
+            background: #2C2C2E; color: var(--text-sec); font-weight: bold; font-size: 13px;
         }
         .tab.active { background: var(--card); color: #FFF; border: 1px solid var(--accent); }
 
         .card {
-            background: var(--card); padding: 18px; border-radius: 18px;
-            margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            background: var(--card); padding: 12px 15px; border-radius: 15px;
+            margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
-        .stats-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
-        .label { font-size: 9px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-        .value-small { font-size: 18px; font-weight: 800; }
+        .stats-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center; }
+        .label { font-size: 9px; color: var(--text-sec); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px; }
+        .value-small { font-size: 17px; font-weight: 800; }
         
         .editable { border-bottom: 1px dashed #555; color: var(--accent); }
 
         input {
             width: 100%; box-sizing: border-box; background: #2C2C2E;
-            border: 1px solid #3A3A3C; border-radius: 12px; color: #FFF;
-            padding: 16px; margin: 8px 0; font-size: 17px; outline: none;
+            border: 1px solid #3A3A3C; border-radius: 10px; color: #FFF;
+            padding: 12px; margin: 6px 0; font-size: 16px; outline: none;
         }
 
-        .btn-group { display: flex; gap: 10px; margin-top: 5px; }
+        .btn-group { display: flex; gap: 8px; margin-top: 4px; }
         .main-btn {
             flex: 2; background: var(--accent); border: none;
-            padding: 18px; border-radius: 14px; font-weight: 800; font-size: 16px;
-            color: white; transition: all 0.2s;
+            padding: 14px; border-radius: 12px; font-weight: 800; font-size: 15px;
+            color: white;
         }
         .descanso-btn {
             flex: 1; background: #2C2C2E; border: 1.5px solid var(--blue);
-            padding: 18px; border-radius: 14px; font-weight: 700; font-size: 13px;
+            padding: 14px; border-radius: 12px; font-weight: 700; font-size: 12px;
             color: var(--blue);
         }
-        .main-btn:active, .descanso-btn:active { transform: scale(0.96); opacity: 0.8; }
 
         .progress-container {
-            height: 12px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden;
+            height: 8px; background: #333; border-radius: 10px; margin: 10px 0; overflow: hidden;
         }
         .progress-bar {
             height: 100%; 
-            /* Gradiente normal (Naranja) */
             background: linear-gradient(90deg, #FFD60A, var(--accent));
             width: 0%; 
-            transition: width 1s ease-in-out, background 0.5s ease;
+            transition: width 1s ease-in-out;
             border-radius: 10px;
         }
-        /* Clase especial para cuando superas el 100% */
-        .progress-bar.success {
-            background: linear-gradient(90deg, #CEFFC9, var(--green));
-        }
+        .progress-bar.success { background: linear-gradient(90deg, #CEFFC9, var(--green)); }
 
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        td, th { padding: 12px 5px; border-bottom: 1px solid #333; }
-        .btn-del { color: var(--red); background: none; border: none; font-weight: 600; font-size: 12px; }
-
-        .export-btn {
-            display: block; width: 100%; background: transparent;
-            border: 1.5px solid var(--green); color: var(--green);
-            padding: 12px; border-radius: 12px; margin-top: 20px; font-weight: bold; font-size: 14px;
-        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        td, th { padding: 10px 5px; border-bottom: 1px solid #333; }
+        .btn-del { color: var(--red); background: none; border: none; font-weight: 600; }
 
         .hidden { display: none; }
-        .hint { font-size: 11px; color: var(--text-sec); text-align: center; margin-top: -5px; margin-bottom: 10px; display: block; }
     </style>
 </head>
 <body>
@@ -153,7 +140,6 @@
                 <button class="descanso-btn" onclick="addDescanso()">Descanso</button>
                 <button class="main-btn" onclick="addVenta()">Guardar Venta</button>
             </div>
-            <span class="hint">Alerta: Solo montos > $0</span>
         </div>
 
         <div class="card">
@@ -163,39 +149,42 @@
                 <div><div class="label">Progreso</div><div class="value-small" id="porc" style="color:var(--accent)">0%</div></div>
             </div>
             <div class="progress-container"><div class="progress-bar" id="barra"></div></div>
-            <div id="status" style="text-align:center; font-size: 12px; font-weight: bold; color: var(--text-sec); text-transform: uppercase;"></div>
+            <div id="status" style="text-align:center; font-size: 11px; font-weight: bold; color: var(--text-sec); text-transform: uppercase;"></div>
         </div>
     </div>
 
     <div id="historial" class="hidden">
         <div class="card">
             <table id="tabla">
-                <thead><tr><th>Fecha</th><th>Monto</th><th style="text-align:right">Borrar</th></tr></thead>
+                <thead><tr><th>Fecha</th><th>Monto</th><th style="text-align:right">X</th></tr></thead>
                 <tbody></tbody>
             </table>
-            <button class="export-btn" onclick="exportar()">📥 Exportar Respaldo (Excel)</button>
         </div>
     </div>
 </div>
 
 <script>
-    // Inicializar fecha
-    document.getElementById('f-in').value = new Date().toISOString().split('T')[0];
+    function getFechaLocal() {
+        const d = new Date();
+        const offset = d.getTimezoneOffset() * 60000; 
+        return (new Date(d - offset)).toISOString().split('T')[0];
+    }
+
+    document.getElementById('f-in').value = getFechaLocal();
 
     function getClaveMeta() { return "meta_" + document.getElementById('mesSel').value; }
     function getClaveVentas() { return "v26_" + document.getElementById('mesSel').value; }
 
     function editarMeta() {
         let actual = localStorage.getItem(getClaveMeta()) || 42000;
-        let nueva = prompt("Meta mensual (sin coma ni punto):", actual);
-        if (nueva && !isNaN(nueva) && nueva > 0) { localStorage.setItem(getClaveMeta(), nueva); actualizar(); }
+        let nueva = prompt("Meta mensual:", actual);
+        if (nueva && !isNaN(nueva)) { localStorage.setItem(getClaveMeta(), nueva); actualizar(); }
     }
 
     function addVenta() {
         const f = document.getElementById('f-in').value;
         const v = parseFloat(document.getElementById('v-in').value);
-        // Validación de monto: Solo > $0
-        if (!v || v <= 0 || !f) { alert("¡Monto inválido!"); return; }
+        if (!v || v <= 0 || !f) return;
         saveEntry({ id: Date.now(), f, v, tipo: 'venta' });
         document.getElementById('v-in').value = "";
     }
@@ -209,16 +198,9 @@
     function saveEntry(obj) {
         const clave = "v26_" + obj.f.substring(0, 7);
         let data = JSON.parse(localStorage.getItem(clave)) || [];
-        // Evitar duplicados de descanso
-        if(obj.tipo === 'descanso' && data.some(i => i.f === obj.f && i.tipo === 'descanso')) { alert("Día ya registrado"); return; }
         data.push(obj);
         localStorage.setItem(clave, JSON.stringify(data));
         actualizar();
-        
-        // Feedback visual en el botón
-        const btn = document.querySelector('.main-btn');
-        btn.style.background = '#30D158'; btn.innerText = "¡Hecho!";
-        setTimeout(() => { btn.style.background = '#FF9F0A'; btn.innerText = "Guardar Venta"; }, 800);
     }
 
     function borrar(id) {
@@ -232,65 +214,48 @@
     function actualizar() {
         const mesSel = document.getElementById('mesSel').value;
         const metaActual = parseFloat(localStorage.getItem(getClaveMeta())) || 42000;
-        const hoyISO = new Date().toISOString().split('T')[0];
+        const hoyLocal = getFechaLocal();
         
-        document.getElementById('metaTxt').innerText = metaActual.toLocaleString('es-MX', {minimumFractionDigits: 0});
+        document.getElementById('metaTxt').innerText = metaActual.toLocaleString();
 
         const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
         const totalLogrado = data.reduce((acc, i) => acc + i.v, 0);
         const rest = metaActual - totalLogrado;
         
-        // 1. VENDIDO HOY (Suma de la fecha de hoy, NO de la elegida en calendario)
-        const vendidoHoy = data.filter(i => i.f === hoyISO).reduce((acc, i) => acc + i.v, 0);
-        const esDescansoHoy = data.some(i => i.f === hoyISO && i.tipo === 'descanso');
-        document.getElementById('v-hoy').innerText = esDescansoHoy ? "OFF" : "$" + vendidoHoy.toLocaleString();
-        document.getElementById('v-hoy').style.color = esDescansoHoy ? "var(--blue)" : "var(--green)";
+        const vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + i.v, 0);
+        document.getElementById('v-hoy').innerText = "$" + vendidoHoy.toLocaleString();
 
-        // 2. CONTADOR DE DESCANSOS (En el mes seleccionado)
         const totalDescansos = data.filter(i => i.tipo === 'descanso').length;
         document.getElementById('descansosCount').innerText = totalDescansos;
 
-        // 3. LÓGICA DE DÍAS Y CUMPLIMIENTO
         const añoMes = mesSel.split('-');
         const ultimoDia = new Date(añoMes[0], añoMes[1], 0).getDate();
+        const diaHoyNum = parseInt(hoyLocal.split('-')[2]);
         
-        // Días de descanso marcados desde hoy en adelante para este mes
-        const descansosFuturos = data.filter(i => i.tipo === 'descanso' && i.f >= hoyISO && i.f.startsWith(mesSel)).length;
+        const descansosFuturos = data.filter(i => i.tipo === 'descanso' && i.f >= hoyLocal && i.f.startsWith(mesSel)).length;
         
         let diasDisponibles;
-        if(hoyISO.startsWith(mesSel)) {
-            const diasCalendario = (ultimoDia - new Date().getDate()) + 1;
-            diasDisponibles = Math.max(diasCalendario - descansosFuturos, 1);
+        if(hoyLocal.startsWith(mesSel)) {
+            diasDisponibles = Math.max((ultimoDia - diaHoyNum) + 1 - descansosFuturos, 1);
         } else {
             diasDisponibles = ultimoDia - descansosFuturos;
         }
 
-        const p = Math.min((totalLogrado / metaActual) * 100, 100);
-        // El porcentaje sigue subiendo real (ej 110.5%)
         const porcReal = (totalLogrado / metaActual) * 100;
         document.getElementById('porc').innerText = porcReal.toFixed(1) + "%";
-        document.getElementById('barra').style.width = p + "%"; // La barra física se para en 100
+        document.getElementById('barra').style.width = Math.min(porcReal, 100) + "%";
 
-        // 4. LÓGICA DE COLORES DE LA BARRA (>100% VERDE)
         const barElement = document.getElementById('barra');
         const st = document.getElementById('status');
         
         if (porcReal >= 100) {
-            barElement.classList.add('success'); // Gradiente verde celebración
-            st.innerText = "🏆 ¡OBJETIVO MENSUAL SUPERADO!"; st.style.color = "var(--green)";
+            barElement.classList.add('success');
+            st.innerText = "🏆 OBJETIVO SUPERADO";
         } else {
-            barElement.classList.remove('success'); // Gradiente naranja normal
+            barElement.classList.remove('success');
             st.innerText = `Quedan ${diasDisponibles} días laborables`;
-            
-            // Alerta de cierre de mes (quedan 5 días o menos y no hay meta cumplida)
-            if (hoyISO.startsWith(mesSel) && diasDisponibles <= 5) {
-                st.style.color = "var(--red)"; // Alerta roja
-            } else {
-                st.style.color = "var(--text-sec)";
-            }
         }
 
-        // Resto UI
         document.getElementById('total').innerText = totalLogrado.toLocaleString();
         document.getElementById('restante').innerText = "$" + (rest < 0 ? 0 : rest).toLocaleString();
 
@@ -299,8 +264,8 @@
         data.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
             tbody.innerHTML += `<tr>
                 <td>${i.f.split('-').reverse().slice(0,2).join('/')}</td>
-                <td>${i.tipo === 'descanso' ? '<span style="color:var(--blue)">DESC.</span>' : '<b>$' + i.v.toLocaleString() + '</b>'}</td>
-                <td style="text-align:right"><button class="btn-del" onclick="borrar(${i.id})">Borrar</button></td>
+                <td>${i.tipo === 'descanso' ? 'DESC.' : '<b>$' + i.v.toLocaleString() + '</b>'}</td>
+                <td style="text-align:right"><button class="btn-del" onclick="borrar(${i.id})">X</button></td>
             </tr>`;
         });
     }
@@ -310,18 +275,6 @@
         document.getElementById('historial').classList.toggle('hidden', t !== 'historial');
         document.getElementById('t-control').classList.toggle('active', t === 'control');
         document.getElementById('t-historial').classList.toggle('active', t === 'historial');
-    }
-
-    function exportar() {
-        const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
-        if(data.length === 0) return alert("Sin datos");
-        let csv = "Fecha,Monto,Tipo\n";
-        data.forEach(i => csv += `${i.f},${i.v},${i.tipo}\n`);
-        const blob = new Blob([csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = `Reporte_${document.getElementById('mesSel').value}.csv`;
-        a.click();
     }
 
     actualizar();
