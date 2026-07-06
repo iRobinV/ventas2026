@@ -31,11 +31,8 @@
             margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
-        /* Top Stats adaptado a 3 columnas sin la meta diaria */
         .stats-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
         .stats-top > div { background: #2C2C2E; padding: 10px 5px; border-radius: 10px; }
-        
-        .stats-small { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center; margin-bottom: 10px; }
 
         .label { font-size: 10px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 4px; font-weight: 600;}
         .value-small { font-size: 15px; font-weight: 800; }
@@ -54,11 +51,12 @@
             padding: 14px; border-radius: 12px; font-weight: 800; color: white; font-size: 16px;
         }
 
-        .progress-container { height: 8px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; }
-        .progress-bar { height: 100%; background: linear-gradient(90deg, #FFD60A, var(--accent)); width: 0%; transition: width 1s; }
+        .history-filter-btn {
+            background: #3A3A3C; border: none; padding: 10px; border-radius: 10px;
+            color: #FFF; font-size: 12px; font-weight: bold; width: 100%; margin-top: -5px; margin-bottom: 10px;
+        }
         
-        /* Nuevo recuadro de resumen */
-        .summary-box { background: #2C2C2E; border-radius: 10px; padding: 12px; margin-top: 15px; }
+        .summary-box { background: #2C2C2E; border-radius: 10px; padding: 12px; }
         .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: 600; }
         .summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px solid #3A3A3C; color: var(--green); }
 
@@ -139,21 +137,14 @@
         </div>
 
         <div class="card">
-            <div class="stats-small">
-                <div><div class="label">Logrado</div><div class="value-small" style="color:var(--green)">$<span id="total">0</span></div></div>
-                <div><div class="label">Faltante</div><div class="value-small" id="restante">$0</div></div>
-                <div><div class="label">Progreso</div><div class="value-small" id="porc">0%</div></div>
-            </div>
-            <div class="progress-container"><div class="progress-bar" id="barra"></div></div>
-            
             <div class="summary-box">
                 <div class="summary-row">
-                    <span>Total Venta (Sin IVA):</span>
-                    <span id="sum-sin-iva">$0</span>
+                    <span>Total Venta (Con 16% IVA):</span>
+                    <span id="sum-con-iva">$0.00</span>
                 </div>
                 <div class="summary-row">
-                    <span>Total Venta (Con 16% IVA):</span>
-                    <span id="sum-con-iva">$0</span>
+                    <span>Total Venta (Sin IVA):</span>
+                    <span id="sum-sin-iva" style="color: var(--accent);">$0.00</span>
                 </div>
                 <div class="summary-row">
                     <span>Comisiones Totales (Aprox):</span>
@@ -165,6 +156,10 @@
 
     <div id="historial" class="hidden">
         <div class="card">
+            <div class="label" style="text-align: center; margin-bottom: 5px;">Filtrar Historial por Día</div>
+            <input type="date" id="filtro-fecha" onchange="actualizarHistorial()">
+            <button class="history-filter-btn" onclick="limpiarFiltroDia()">Ver Todo el Mes</button>
+            
             <table id="tabla">
                 <thead><tr><th>Fecha</th><th>Servicio Registrado</th><th style="text-align:right">Borrar</th></tr></thead>
                 <tbody></tbody>
@@ -174,7 +169,6 @@
 </div>
 
 <script>
-    // --- BASE DE DATOS DE SERVICIOS ACTUALIZADA ---
     const catalogo = {
         "barra": {
             servicios: [
@@ -202,22 +196,20 @@
         });
     }
 
-    // Establecer fecha actual
     function getFechaLocal() {
         const d = new Date();
         const offset = d.getTimezoneOffset() * 60000; 
         return (new Date(d - offset)).toISOString().split('T')[0];
     }
+    
     document.getElementById('f-in').value = getFechaLocal();
 
-    // Establecer mes y año actual en los selectores por defecto
     const currentMonth = new Date().getMonth() + 1;
     document.getElementById('mesSel').value = currentMonth < 10 ? '0' + currentMonth : currentMonth;
     document.getElementById('yearSel').value = new Date().getFullYear().toString();
 
     cargarServicios(); 
 
-    // Claves únicas por Mes y Año
     function getClaveMeta() { return `meta_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
     function getClaveVentas() { return `ventas_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
 
@@ -264,6 +256,11 @@
         actualizar();
     }
 
+    function limpiarFiltroDia() {
+        document.getElementById('filtro-fecha').value = "";
+        actualizarHistorial();
+    }
+
     function actualizar() {
         const metaActual = parseFloat(localStorage.getItem(getClaveMeta())) || 42000;
         const hoyLocal = getFechaLocal();
@@ -271,12 +268,9 @@
 
         const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
         
-        // Sumatorias
         const totalLogrado = data.reduce((acc, i) => acc + (i.v || 0), 0);
         const totalComisiones = data.reduce((acc, i) => acc + (i.comision || 0), 0);
-        const rest = metaActual - totalLogrado;
         
-        // Top Card Update
         document.getElementById('comisionesTxt').innerText = "$" + totalComisiones.toLocaleString();
         const vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + (i.v || 0), 0);
         
@@ -284,30 +278,35 @@
         vHoyTxt.innerText = "$" + vendidoHoy.toLocaleString();
         vHoyTxt.style.color = vendidoHoy > 0 ? "var(--green)" : "var(--text)";
 
-        // Progress Stats Update
-        const porc = (totalLogrado / metaActual) * 100;
-        document.getElementById('porc').innerText = porc.toFixed(1) + "%";
-        document.getElementById('barra').style.width = Math.min(porc, 100) + "%";
-        document.getElementById('total').innerText = totalLogrado.toLocaleString();
-        document.getElementById('restante').innerText = "$" + (rest < 0 ? 0 : rest).toLocaleString();
-
-        // Resumen Inferior (Sin IVA y Con IVA)
-        const totalConIva = totalLogrado * 1.16;
-        document.getElementById('sum-sin-iva').innerText = "$" + totalLogrado.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        document.getElementById('sum-con-iva').innerText = "$" + totalConIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        // MATEMÁTICA CORREGIDA: Monto base tiene IVA -> Dividimos entre 1.16 para el neto sin IVA.
+        const totalSinIva = totalLogrado / 1.16;
+        document.getElementById('sum-con-iva').innerText = "$" + totalLogrado.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('sum-sin-iva').innerText = "$" + totalSinIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('sum-comisiones').innerText = "$" + totalComisiones.toLocaleString();
 
-        // Llenar tabla de historial
+        actualizarHistorial();
+    }
+
+    function actualizarHistorial() {
+        const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
+        const filtroDia = document.getElementById('filtro-fecha').value;
         const tbody = document.querySelector('#tabla tbody');
         tbody.innerHTML = "";
-        data.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
+
+        // Filtrar datos según la fecha seleccionada en el historial (si la hay)
+        let datosFiltrados = data;
+        if (filtroDia) {
+            datosFiltrados = data.filter(i => i.f === filtroDia);
+        }
+
+        datosFiltrados.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
             const fechaStr = i.f.split('-').reverse().slice(0,2).join('/');
             
             tbody.innerHTML += `<tr>
                 <td style="color:var(--text-sec)">${fechaStr}</td>
                 <td>
                     <div class="historial-title">${i.nombre || 'Servicio'}</div>
-                    <div class="historial-sub">Suma a meta: $${(i.v || 0).toLocaleString()} <span style="color:var(--green)">| Com: $${(i.comision || 0).toLocaleString()}</span></div>
+                    <div class="historial-sub">Meta (Con IVA): $${(i.v || 0).toLocaleString()} | <span style="color:var(--accent)">Sin IVA: $${((i.v || 0)/1.16).toFixed(2)}</span> <span style="color:var(--green)">| Com: $${(i.comision || 0).toLocaleString()}</span></div>
                 </td>
                 <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px;">X</button></td>
             </tr>`;
@@ -319,6 +318,7 @@
         document.getElementById('historial').classList.toggle('hidden', t !== 'historial');
         document.getElementById('t-control').classList.toggle('active', t === 'control');
         document.getElementById('t-historial').classList.toggle('active', t === 'historial');
+        if(t === 'historial') { actualizarHistorial(); }
     }
     actualizar();
 </script>
