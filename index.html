@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ventas 2026 PRO</title>
+    <title>Ventas PRO</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/10384/10384160.png">
@@ -11,7 +11,7 @@
     <style>
         :root {
             --bg: #000; --card: #1C1C1E; --accent: #FF9F0A;
-            --green: #30D158; --red: #FF453A; --blue: #0A84FF; --purple: #BF5AF2;
+            --green: #30D158; --red: #FF453A; --blue: #0A84FF;
             --text: #FFF; --text-sec: #8E8E93;
         }
 
@@ -22,72 +22,82 @@
         }
 
         .container { max-width: 400px; margin: auto; }
-        h1 { text-align: center; color: var(--accent); font-size: 20px; margin: 8px 0; font-weight: 800; }
+        
+        .header-selectors { display: flex; gap: 10px; margin: 15px 0; }
+        .header-selectors select { margin: 0; font-weight: 600; font-size: 16px; background: #2C2C2E; border: none; }
 
         .card {
-            background: var(--card); padding: 12px; border-radius: 15px;
-            margin-bottom: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            background: var(--card); padding: 15px; border-radius: 15px;
+            margin-bottom: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
 
-        /* Cambiado a 2x2 para acomodar las comisiones cómodamente */
-        .stats-top { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: center; }
-        .stats-top > div { background: #2C2C2E; padding: 8px; border-radius: 10px; }
+        /* Top Stats adaptado a 3 columnas sin la meta diaria */
+        .stats-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
+        .stats-top > div { background: #2C2C2E; padding: 10px 5px; border-radius: 10px; }
         
         .stats-small { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; text-align: center; margin-bottom: 10px; }
 
         .label { font-size: 10px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 4px; font-weight: 600;}
-        .value-small { font-size: 16px; font-weight: 800; }
+        .value-small { font-size: 15px; font-weight: 800; }
         
         .editable { border-bottom: 1px dashed #555; color: var(--accent); }
 
         input, select {
             width: 100%; box-sizing: border-box; background: #2C2C2E;
             border: 1px solid #3A3A3C; border-radius: 10px; color: #FFF;
-            padding: 12px; margin: 5px 0 12px 0; font-size: 15px; outline: none;
+            padding: 12px; margin: 5px 0 15px 0; font-size: 15px; outline: none;
             display: block; -webkit-appearance: none;
         }
 
-        .btn-group { display: flex; gap: 8px; margin-top: 5px; }
         .main-btn {
-            flex: 2; background: var(--accent); border: none;
-            padding: 14px; border-radius: 12px; font-weight: 800; color: white;
-        }
-        .descanso-btn {
-            flex: 1; background: #2C2C2E; border: 1.5px solid var(--blue);
-            padding: 14px; border-radius: 12px; font-weight: 700; color: var(--blue);
+            width: 100%; background: var(--accent); border: none;
+            padding: 14px; border-radius: 12px; font-weight: 800; color: white; font-size: 16px;
         }
 
-        .iva-btn {
-            width: 100%; background: #1c1c1e; border: 1px solid var(--green);
-            color: var(--green); padding: 12px; border-radius: 12px;
-            font-size: 12px; font-weight: bold; margin-top: 10px;
-        }
-
-        .progress-container { height: 8px; background: #333; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        .progress-container { height: 8px; background: #333; border-radius: 10px; margin: 15px 0; overflow: hidden; }
         .progress-bar { height: 100%; background: linear-gradient(90deg, #FFD60A, var(--accent)); width: 0%; transition: width 1s; }
         
-        .tabs { display: flex; gap: 6px; margin-bottom: 10px; }
-        .tab { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #2C2C2E; color: var(--text-sec); font-size: 12px; font-weight: bold;}
+        /* Nuevo recuadro de resumen */
+        .summary-box { background: #2C2C2E; border-radius: 10px; padding: 12px; margin-top: 15px; }
+        .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: 600; }
+        .summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px solid #3A3A3C; color: var(--green); }
+
+        .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+        .tab { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #2C2C2E; color: var(--text-sec); font-size: 13px; font-weight: bold;}
         .tab.active { background: var(--card); color: #FFF; border: 1px solid var(--accent); }
 
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        td, th { padding: 10px 5px; border-bottom: 1px solid #333; text-align: left; }
+        td, th { padding: 12px 5px; border-bottom: 1px solid #333; text-align: left; }
         .historial-title { font-weight: 600; font-size: 14px; }
-        .historial-sub { font-size: 11px; color: var(--text-sec); }
+        .historial-sub { font-size: 11px; color: var(--text-sec); margin-top: 3px; }
         .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Ventas 2026 PRO</h1>
-
-    <select id="mesSel" onchange="actualizar()">
-        <option value="2026-04">Abril 2026</option>
-        <option value="2026-05">Mayo 2026</option>
-        <option value="2026-06">Junio 2026</option>
-        <option value="2026-07">Julio 2026</option>
-    </select>
+    <div class="header-selectors">
+        <select id="mesSel" onchange="actualizar()">
+            <option value="01">Enero</option>
+            <option value="02">Febrero</option>
+            <option value="03">Marzo</option>
+            <option value="04">Abril</option>
+            <option value="05">Mayo</option>
+            <option value="06">Junio</option>
+            <option value="07">Julio</option>
+            <option value="08">Agosto</option>
+            <option value="09">Septiembre</option>
+            <option value="10">Octubre</option>
+            <option value="11">Noviembre</option>
+            <option value="12">Diciembre</option>
+        </select>
+        <select id="yearSel" onchange="actualizar()">
+            <option value="2026">2026</option>
+            <option value="2027">2027</option>
+            <option value="2028">2028</option>
+            <option value="2029">2029</option>
+        </select>
+    </div>
 
     <div class="card stats-top">
         <div onclick="editarMeta()">
@@ -95,15 +105,11 @@
             <div class="value-small editable">$<span id="metaTxt">0</span></div>
         </div>
         <div>
-            <div class="label">Meta Diaria (26d)</div>
-            <div class="value-small" id="m-diaria" style="color: var(--accent)">$0</div>
-        </div>
-        <div>
             <div class="label">Vendido Hoy</div>
             <div class="value-small" id="v-hoy">$0</div>
         </div>
         <div>
-            <div class="label">Comisiones Mes</div>
+            <div class="label">Comisiones</div>
             <div class="value-small" id="comisionesTxt" style="color: var(--green)">$0</div>
         </div>
     </div>
@@ -115,7 +121,7 @@
 
     <div id="control">
         <div class="card">
-            <div class="label" style="text-align: center; margin-bottom: 10px; font-size: 12px;">Nueva Entrada</div>
+            <div class="label" style="text-align: center; margin-bottom: 12px; font-size: 12px;">Nueva Entrada</div>
             
             <input type="date" id="f-in">
             
@@ -129,10 +135,7 @@
             <select id="serv-in">
                 </select>
 
-            <div class="btn-group">
-                <button class="descanso-btn" onclick="addDescanso()">Descanso</button>
-                <button class="main-btn" onclick="addVenta()">Guardar Servicio</button>
-            </div>
+            <button class="main-btn" onclick="addVenta()">Guardar Servicio</button>
         </div>
 
         <div class="card">
@@ -142,9 +145,21 @@
                 <div><div class="label">Progreso</div><div class="value-small" id="porc">0%</div></div>
             </div>
             <div class="progress-container"><div class="progress-bar" id="barra"></div></div>
-            <div id="status" style="text-align:center; font-size: 10px; font-weight: bold; color: var(--text-sec);"></div>
             
-            <button class="iva-btn" onclick="mostrarSinIva()">CALCULAR TOTAL SIN IVA (16%)</button>
+            <div class="summary-box">
+                <div class="summary-row">
+                    <span>Total Venta (Sin IVA):</span>
+                    <span id="sum-sin-iva">$0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Total Venta (Con 16% IVA):</span>
+                    <span id="sum-con-iva">$0</span>
+                </div>
+                <div class="summary-row">
+                    <span>Comisiones Totales (Aprox):</span>
+                    <span id="sum-comisiones">$0</span>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -159,18 +174,20 @@
 </div>
 
 <script>
-    // --- NUEVO: BASE DE DATOS DE SERVICIOS ---
+    // --- BASE DE DATOS DE SERVICIOS ACTUALIZADA ---
     const catalogo = {
         "barra": {
             servicios: [
                 { nombre: "Configuraciones IOS", valor: 1229, comision: 45 },
-                { nombre: "Restauración / Actualizacion IOS", valor: 1229, comision: 45 }
+                { nombre: "Restauración / Actualizacion IOS", valor: 1229, comision: 45 },
+                { nombre: "Membresía SPA", valor: 2090, comision: 140 },
+                { nombre: "Membresía Personal", valor: 3999, comision: 215 },
+                { nombre: "Limpieza AirPods", valor: 919, comision: 15 }
             ]
         },
         "laboratorio": {
             servicios: [
                 { nombre: "Próximamente...", valor: 0, comision: 0 }
-                // Aquí iremos agregando los de laboratorio después
             ]
         }
     };
@@ -181,23 +198,28 @@
         servSelect.innerHTML = "";
         
         catalogo[cat].servicios.forEach((s, index) => {
-            servSelect.innerHTML += `<option value="${index}">${s.nombre} (+ $${s.valor})</option>`;
+            servSelect.innerHTML += `<option value="${index}">${s.nombre} (+ $${s.valor.toLocaleString()})</option>`;
         });
     }
 
-    // --- FUNCIONES EXISTENTES ADAPTADAS ---
+    // Establecer fecha actual
     function getFechaLocal() {
         const d = new Date();
         const offset = d.getTimezoneOffset() * 60000; 
         return (new Date(d - offset)).toISOString().split('T')[0];
     }
-
-    // Inicializar fecha y menús
     document.getElementById('f-in').value = getFechaLocal();
+
+    // Establecer mes y año actual en los selectores por defecto
+    const currentMonth = new Date().getMonth() + 1;
+    document.getElementById('mesSel').value = currentMonth < 10 ? '0' + currentMonth : currentMonth;
+    document.getElementById('yearSel').value = new Date().getFullYear().toString();
+
     cargarServicios(); 
 
-    function getClaveMeta() { return "meta_" + document.getElementById('mesSel').value; }
-    function getClaveVentas() { return "v26_" + document.getElementById('mesSel').value; }
+    // Claves únicas por Mes y Año
+    function getClaveMeta() { return `meta_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
+    function getClaveVentas() { return `ventas_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
 
     function editarMeta() {
         let actual = localStorage.getItem(getClaveMeta()) || 42000;
@@ -214,25 +236,17 @@
 
         const servicioEscogido = catalogo[cat].servicios[servIndex];
 
-        // Guardamos el monto para la meta y la comisión extraída
         saveEntry({ 
             id: Date.now(), 
             f: f, 
             v: servicioEscogido.valor, 
             comision: servicioEscogido.comision,
             nombre: servicioEscogido.nombre,
-            tipo: 'venta' 
         });
         
-        // Efecto de confirmación simple visual
         const btn = document.querySelector('.main-btn');
         btn.innerText = "¡Guardado!";
         setTimeout(() => btn.innerText = "Guardar Servicio", 1500);
-    }
-
-    function addDescanso() {
-        const f = document.getElementById('f-in').value;
-        saveEntry({ id: Date.now(), f: f, v: 0, comision: 0, nombre: "Día de Descanso", tipo: 'descanso' });
     }
 
     function saveEntry(obj) {
@@ -250,13 +264,6 @@
         actualizar();
     }
 
-    function mostrarSinIva() {
-        const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
-        const totalLogrado = data.reduce((acc, i) => acc + (i.v || 0), 0);
-        const sinIva = totalLogrado / 1.16;
-        alert("TOTAL A META: $" + totalLogrado.toLocaleString() + "\nSIN IVA (16%): $" + sinIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
-    }
-
     function actualizar() {
         const metaActual = parseFloat(localStorage.getItem(getClaveMeta())) || 42000;
         const hoyLocal = getFechaLocal();
@@ -269,30 +276,26 @@
         const totalComisiones = data.reduce((acc, i) => acc + (i.comision || 0), 0);
         const rest = metaActual - totalLogrado;
         
-        // Actualizar comisiones totales
+        // Top Card Update
         document.getElementById('comisionesTxt').innerText = "$" + totalComisiones.toLocaleString();
-
-        // Lógica de 26 días laborables
-        const diasConVenta = new Set(data.filter(i => i.tipo === 'venta').map(i => i.f)).size;
-        const diasRestantes = Math.max(26 - diasConVenta, 1);
-
-        const metaDiaria = (rest > 0) ? Math.ceil(rest / diasRestantes) : 0;
-        document.getElementById('m-diaria').innerText = "$" + metaDiaria.toLocaleString();
-
         const vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + (i.v || 0), 0);
-        const esDescanso = data.some(i => i.f === hoyLocal && i.tipo === 'descanso');
-        const vHoyTxt = document.getElementById('v-hoy');
         
-        vHoyTxt.innerText = esDescanso ? "DESC." : "$" + vendidoHoy.toLocaleString();
-        vHoyTxt.style.color = esDescanso || vendidoHoy >= metaDiaria ? "var(--green)" : "var(--red)";
+        const vHoyTxt = document.getElementById('v-hoy');
+        vHoyTxt.innerText = "$" + vendidoHoy.toLocaleString();
+        vHoyTxt.style.color = vendidoHoy > 0 ? "var(--green)" : "var(--text)";
 
-        // Barra de progreso
+        // Progress Stats Update
         const porc = (totalLogrado / metaActual) * 100;
         document.getElementById('porc').innerText = porc.toFixed(1) + "%";
         document.getElementById('barra').style.width = Math.min(porc, 100) + "%";
         document.getElementById('total').innerText = totalLogrado.toLocaleString();
         document.getElementById('restante').innerText = "$" + (rest < 0 ? 0 : rest).toLocaleString();
-        document.getElementById('status').innerText = `Días de venta restantes: ${diasRestantes} de 26`;
+
+        // Resumen Inferior (Sin IVA y Con IVA)
+        const totalConIva = totalLogrado * 1.16;
+        document.getElementById('sum-sin-iva').innerText = "$" + totalLogrado.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('sum-con-iva').innerText = "$" + totalConIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('sum-comisiones').innerText = "$" + totalComisiones.toLocaleString();
 
         // Llenar tabla de historial
         const tbody = document.querySelector('#tabla tbody');
@@ -300,22 +303,14 @@
         data.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
             const fechaStr = i.f.split('-').reverse().slice(0,2).join('/');
             
-            if (i.tipo === 'descanso') {
-                tbody.innerHTML += `<tr>
-                    <td style="color:var(--text-sec)">${fechaStr}</td>
-                    <td><span style="color:var(--blue); font-weight:bold;">${i.nombre || 'Día de Descanso'}</span></td>
-                    <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px;">X</button></td>
-                </tr>`;
-            } else {
-                tbody.innerHTML += `<tr>
-                    <td style="color:var(--text-sec)">${fechaStr}</td>
-                    <td>
-                        <div class="historial-title">${i.nombre || 'Servicio General'}</div>
-                        <div class="historial-sub">Suma a meta: $${(i.v || 0).toLocaleString()} <span style="color:var(--green)">| Com: $${(i.comision || 0).toLocaleString()}</span></div>
-                    </td>
-                    <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px;">X</button></td>
-                </tr>`;
-            }
+            tbody.innerHTML += `<tr>
+                <td style="color:var(--text-sec)">${fechaStr}</td>
+                <td>
+                    <div class="historial-title">${i.nombre || 'Servicio'}</div>
+                    <div class="historial-sub">Suma a meta: $${(i.v || 0).toLocaleString()} <span style="color:var(--green)">| Com: $${(i.comision || 0).toLocaleString()}</span></div>
+                </td>
+                <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px;">X</button></td>
+            </tr>`;
         });
     }
 
