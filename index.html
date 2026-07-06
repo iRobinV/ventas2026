@@ -51,10 +51,8 @@
             padding: 14px; border-radius: 12px; font-weight: 800; color: white; font-size: 16px;
         }
 
-        .history-filter-btn {
-            background: #3A3A3C; border: none; padding: 10px; border-radius: 10px;
-            color: #FFF; font-size: 12px; font-weight: bold; width: 100%; margin-top: -5px; margin-bottom: 10px;
-        }
+        .progress-container { height: 8px; background: #333; border-radius: 10px; margin: 5px 0 15px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, #FFD60A, var(--accent)); width: 0%; transition: width 1s; }
         
         .summary-box { background: #2C2C2E; border-radius: 10px; padding: 12px; }
         .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; font-weight: 600; }
@@ -63,6 +61,10 @@
         .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
         .tab { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #2C2C2E; color: var(--text-sec); font-size: 13px; font-weight: bold;}
         .tab.active { background: var(--card); color: #FFF; border: 1px solid var(--accent); }
+
+        /* Estilos del Filtro de Historial */
+        .filter-group { display: flex; gap: 8px; margin-bottom: 12px; }
+        .filter-group select { margin: 0; padding: 10px; font-size: 14px; }
 
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         td, th { padding: 12px 5px; border-bottom: 1px solid #333; text-align: left; }
@@ -75,7 +77,7 @@
 
 <div class="container">
     <div class="header-selectors">
-        <select id="mesSel" onchange="actualizar()">
+        <select id="mesSel" onchange="cambioDeMesAno()">
             <option value="01">Enero</option>
             <option value="02">Febrero</option>
             <option value="03">Marzo</option>
@@ -89,7 +91,7 @@
             <option value="11">Noviembre</option>
             <option value="12">Diciembre</option>
         </select>
-        <select id="yearSel" onchange="actualizar()">
+        <select id="yearSel" onchange="cambioDeMesAno()">
             <option value="2026">2026</option>
             <option value="2027">2027</option>
             <option value="2028">2028</option>
@@ -137,14 +139,17 @@
         </div>
 
         <div class="card">
+            <div class="label">Progreso hacia la Meta</div>
+            <div class="progress-container"><div class="progress-bar" id="barra"></div></div>
+            
             <div class="summary-box">
                 <div class="summary-row">
-                    <span>Total Venta (Con 16% IVA):</span>
-                    <span id="sum-con-iva">$0.00</span>
+                    <span>Total Venta (Con IVA):</span>
+                    <span id="sum-con-iva" style="color: var(--accent); font-size: 14px;">$0</span>
                 </div>
                 <div class="summary-row">
-                    <span>Total Venta (Sin IVA):</span>
-                    <span id="sum-sin-iva" style="color: var(--accent);">$0.00</span>
+                    <span>Total Venta (Sin 16% IVA):</span>
+                    <span id="sum-sin-iva" style="color: #FFF;">$0</span>
                 </div>
                 <div class="summary-row">
                     <span>Comisiones Totales (Aprox):</span>
@@ -155,11 +160,14 @@
     </div>
 
     <div id="historial" class="hidden">
+        <div class="filter-group">
+            <select id="filtroMes" onchange="filtrarHistorial()">
+                </select>
+            <select id="filtroDia" onchange="filtrarHistorial()">
+                </select>
+        </div>
+
         <div class="card">
-            <div class="label" style="text-align: center; margin-bottom: 5px;">Filtrar Historial por Día</div>
-            <input type="date" id="filtro-fecha" onchange="actualizarHistorial()">
-            <button class="history-filter-btn" onclick="limpiarFiltroDia()">Ver Todo el Mes</button>
-            
             <table id="tabla">
                 <thead><tr><th>Fecha</th><th>Servicio Registrado</th><th style="text-align:right">Borrar</th></tr></thead>
                 <tbody></tbody>
@@ -201,9 +209,9 @@
         const offset = d.getTimezoneOffset() * 60000; 
         return (new Date(d - offset)).toISOString().split('T')[0];
     }
-    
-    document.getElementById('f-in').value = getFechaLocal();
 
+    // Inicialización de Fechas
+    document.getElementById('f-in').value = getFechaLocal();
     const currentMonth = new Date().getMonth() + 1;
     document.getElementById('mesSel').value = currentMonth < 10 ? '0' + currentMonth : currentMonth;
     document.getElementById('yearSel').value = new Date().getFullYear().toString();
@@ -212,6 +220,11 @@
 
     function getClaveMeta() { return `meta_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
     function getClaveVentas() { return `ventas_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
+
+    function cambioDeMesAno() {
+        configurarFiltrosHistorial();
+        actualizar();
+    }
 
     function editarMeta() {
         let actual = localStorage.getItem(getClaveMeta()) || 42000;
@@ -223,28 +236,24 @@
         const f = document.getElementById('f-in').value;
         const cat = document.getElementById('cat-in').value;
         const servIndex = document.getElementById('serv-in').value;
-        
         if (!servIndex) return;
 
         const servicioEscogido = catalogo[cat].servicios[servIndex];
 
-        saveEntry({ 
+        let data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
+        data.push({ 
             id: Date.now(), 
             f: f, 
             v: servicioEscogido.valor, 
             comision: servicioEscogido.comision,
             nombre: servicioEscogido.nombre,
         });
+        localStorage.setItem(getClaveVentas(), JSON.stringify(data));
         
         const btn = document.querySelector('.main-btn');
         btn.innerText = "¡Guardado!";
         setTimeout(() => btn.innerText = "Guardar Servicio", 1500);
-    }
-
-    function saveEntry(obj) {
-        let data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
-        data.push(obj);
-        localStorage.setItem(getClaveVentas(), JSON.stringify(data));
+        
         actualizar();
     }
 
@@ -256,9 +265,47 @@
         actualizar();
     }
 
-    function limpiarFiltroDia() {
-        document.getElementById('filtro-fecha').value = "";
-        actualizarHistorial();
+    // --- NUEVO: CONFIGURACIÓN FILTROS DINÁMICOS DE HISTORIAL ---
+    function configurarFiltrosHistorial() {
+        const mesSelText = document.getElementById('mesSel').options[document.getElementById('mesSel').selectedIndex].text;
+        const filtroMes = document.getElementById('filtroMes');
+        filtroMes.innerHTML = `<option value="todos">Todo ${mesSelText}</option>`;
+        
+        const filtroDia = document.getElementById('filtroDia');
+        filtroDia.innerHTML = '<option value="todos">Todos los días</option>';
+        for (let d = 1; d <= 31; d++) {
+            const diaStr = d < 10 ? '0' + d : d;
+            filtroDia.innerHTML += `<option value="${diaStr}">Día ${diaStr}</option>`;
+        }
+    }
+
+    function filtrarHistorial() {
+        const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
+        const diaBuscado = document.getElementById('filtroDia').value;
+        const mesActual = document.getElementById('mesSel').value;
+        const yearActual = document.getElementById('yearSel').value;
+
+        const tbody = document.querySelector('#tabla tbody');
+        tbody.innerHTML = "";
+
+        // Filtrar registros
+        let registrosFiltrados = data;
+        if (diaBuscado !== "todos") {
+            const fechaFiltroCompleta = `${yearActual}-${mesActual}-${diaBuscado}`;
+            registrosFiltrados = data.filter(i => i.f === fechaFiltroCompleta);
+        }
+
+        registrosFiltrados.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
+            const fechaCortada = i.f.split('-').reverse().slice(0,2).join('/');
+            tbody.innerHTML += `<tr>
+                <td style="color:var(--text-sec); font-weight:600;">${fechaCortada}</td>
+                <td>
+                    <div class="historial-title">${i.nombre}</div>
+                    <div class="historial-sub">Meta: $${i.v.toLocaleString()} <span style="color:var(--green)">| Com: $${i.comision.toLocaleString()}</span></div>
+                </td>
+                <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px;">X</button></td>
+            </tr>`;
+        });
     }
 
     function actualizar() {
@@ -268,49 +315,31 @@
 
         const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
         
-        const totalLogrado = data.reduce((acc, i) => acc + (i.v || 0), 0);
+        // El total logrado es la venta bruta registrada con IVA
+        const totalConIva = data.reduce((acc, i) => acc + (i.v || 0), 0);
         const totalComisiones = data.reduce((acc, i) => acc + (i.comision || 0), 0);
         
+        // CORRECCIÓN MATEMÁTICA: Si el valor de meta ya tiene IVA, el valor sin IVA es dividido entre 1.16
+        const totalSinIva = totalConIva / 1.16;
+
+        // Indicadores superiores
         document.getElementById('comisionesTxt').innerText = "$" + totalComisiones.toLocaleString();
         const vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + (i.v || 0), 0);
-        
         const vHoyTxt = document.getElementById('v-hoy');
         vHoyTxt.innerText = "$" + vendidoHoy.toLocaleString();
         vHoyTxt.style.color = vendidoHoy > 0 ? "var(--green)" : "var(--text)";
 
-        // MATEMÁTICA CORREGIDA: Monto base tiene IVA -> Dividimos entre 1.16 para el neto sin IVA.
-        const totalSinIva = totalLogrado / 1.16;
-        document.getElementById('sum-con-iva').innerText = "$" + totalLogrado.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        // Barra de progreso calculada sobre la meta bruta (Con IVA)
+        const porc = (totalConIva / metaActual) * 100;
+        document.getElementById('barra').style.width = Math.min(porc, 100) + "%";
+
+        // Actualizar Recuadro del Resumen
+        document.getElementById('sum-con-iva').innerText = "$" + totalConIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('sum-sin-iva').innerText = "$" + totalSinIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('sum-comisiones').innerText = "$" + totalComisiones.toLocaleString();
 
-        actualizarHistorial();
-    }
-
-    function actualizarHistorial() {
-        const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
-        const filtroDia = document.getElementById('filtro-fecha').value;
-        const tbody = document.querySelector('#tabla tbody');
-        tbody.innerHTML = "";
-
-        // Filtrar datos según la fecha seleccionada en el historial (si la hay)
-        let datosFiltrados = data;
-        if (filtroDia) {
-            datosFiltrados = data.filter(i => i.f === filtroDia);
-        }
-
-        datosFiltrados.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
-            const fechaStr = i.f.split('-').reverse().slice(0,2).join('/');
-            
-            tbody.innerHTML += `<tr>
-                <td style="color:var(--text-sec)">${fechaStr}</td>
-                <td>
-                    <div class="historial-title">${i.nombre || 'Servicio'}</div>
-                    <div class="historial-sub">Meta (Con IVA): $${(i.v || 0).toLocaleString()} | <span style="color:var(--accent)">Sin IVA: $${((i.v || 0)/1.16).toFixed(2)}</span> <span style="color:var(--green)">| Com: $${(i.comision || 0).toLocaleString()}</span></div>
-                </td>
-                <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px;">X</button></td>
-            </tr>`;
-        });
+        // Refrescar la visualización del historial usando el filtro actual
+        filtrarHistorial();
     }
 
     function switchTab(t) {
@@ -318,8 +347,10 @@
         document.getElementById('historial').classList.toggle('hidden', t !== 'historial');
         document.getElementById('t-control').classList.toggle('active', t === 'control');
         document.getElementById('t-historial').classList.toggle('active', t === 'historial');
-        if(t === 'historial') { actualizarHistorial(); }
     }
+
+    // Inicializar filtros e interfaz
+    configurarFiltrosHistorial();
     actualizar();
 </script>
 </body>
