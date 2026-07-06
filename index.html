@@ -59,10 +59,9 @@
         .summary-row:last-child { margin-bottom: 0; padding-top: 8px; border-top: 1px solid #3A3A3C; color: var(--green); }
 
         .tabs { display: flex; gap: 6px; margin-bottom: 12px; }
-        .tab { flex: 1; padding: 12px; border-radius: 10px; border: none; background: #2C2C2E; color: var(--text-sec); font-size: 13px; font-weight: bold;}
+        .tab { flex: 1; padding: 10px 5px; border-radius: 10px; border: none; background: #2C2C2E; color: var(--text-sec); font-size: 12px; font-weight: bold;}
         .tab.active { background: var(--card); color: #FFF; border: 1px solid var(--accent); }
 
-        /* Estilos del Filtro de Historial */
         .filter-group { display: flex; gap: 8px; margin-bottom: 12px; }
         .filter-group select { margin: 0; padding: 10px; font-size: 14px; }
 
@@ -71,6 +70,13 @@
         .historial-title { font-weight: 600; font-size: 14px; }
         .historial-sub { font-size: 11px; color: var(--text-sec); margin-top: 3px; }
         .hidden { display: none; }
+        
+        /* Contador de Estadísticas */
+        .counter-btn {
+            background: #2C2C2E; border: 1.5px solid var(--accent); color: var(--accent);
+            border-radius: 10px; font-size: 20px; font-weight: bold; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
@@ -117,6 +123,7 @@
     <div class="tabs">
         <button class="tab active" id="t-control" onclick="switchTab('control')">Control</button>
         <button class="tab" id="t-historial" onclick="switchTab('historial')">Historial</button>
+        <button class="tab" id="t-estadisticas" onclick="switchTab('estadisticas')">Estadísticas</button>
     </div>
 
     <div id="control">
@@ -174,9 +181,31 @@
             </table>
         </div>
     </div>
+
+    <div id="estadisticas" class="hidden">
+        <div class="card" style="text-align: center;">
+            <div class="label" style="font-size: 12px; color: var(--accent);">Reparaciones de Técnicos</div>
+            <div style="font-size: 11px; color: var(--text-sec); margin-bottom: 10px;">Suma +$600 a la meta por reparación</div>
+            
+            <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+                <button class="counter-btn" onclick="modificarReparaciones(-1)">-</button>
+                <span id="reparaciones-count" style="font-size: 28px; font-weight: 800;">0</span>
+                <button class="counter-btn" onclick="modificarReparaciones(1)">+</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="label" style="text-align: center; margin-bottom: 10px;">Servicios Realizados (Mes)</div>
+            <table id="tabla-estadisticas">
+                <thead><tr><th>Servicio</th><th style="text-align:right">Cantidad</th></tr></thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
+    // Catálogo Actualizado
     const catalogo = {
         "barra": {
             servicios: [
@@ -184,12 +213,15 @@
                 { nombre: "Restauración / Actualizacion IOS", valor: 1229, comision: 45 },
                 { nombre: "Membresía SPA", valor: 2090, comision: 140 },
                 { nombre: "Membresía Personal", valor: 3999, comision: 215 },
-                { nombre: "Limpieza AirPods", valor: 919, comision: 15 }
+                { nombre: "Limpieza AirPods", valor: 919, comision: 15 },
+                { nombre: "Freemium", valor: 0, comision: 35 }
             ]
         },
         "laboratorio": {
             servicios: [
-                { nombre: "Próximamente...", valor: 0, comision: 0 }
+                { nombre: "Compra de Airpods", valor: 250, comision: 0 },
+                { nombre: "Trade in / OnePulse no reparo", valor: 0, comision: 20 },
+                { nombre: "Trade in / OnePulse con reparo", valor: 0, comision: 35 }
             ]
         }
     };
@@ -200,7 +232,10 @@
         servSelect.innerHTML = "";
         
         catalogo[cat].servicios.forEach((s, index) => {
-            servSelect.innerHTML += `<option value="${index}">${s.nombre} (+ $${s.valor.toLocaleString()})</option>`;
+            let label = `${s.nombre}`;
+            if(s.valor > 0) label += ` (+$${s.valor.toLocaleString()})`;
+            else if(s.comision > 0) label += ` (+Comisión)`;
+            servSelect.innerHTML += `<option value="${index}">${label}</option>`;
         });
     }
 
@@ -210,7 +245,7 @@
         return (new Date(d - offset)).toISOString().split('T')[0];
     }
 
-    // Inicialización de Fechas
+    // Inicialización
     document.getElementById('f-in').value = getFechaLocal();
     const currentMonth = new Date().getMonth() + 1;
     document.getElementById('mesSel').value = currentMonth < 10 ? '0' + currentMonth : currentMonth;
@@ -218,8 +253,10 @@
 
     cargarServicios(); 
 
+    // Claves de LocalStorage
     function getClaveMeta() { return `meta_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
     function getClaveVentas() { return `ventas_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
+    function getClaveReparaciones() { return `reparaciones_${document.getElementById('yearSel').value}_${document.getElementById('mesSel').value}`; }
 
     function cambioDeMesAno() {
         configurarFiltrosHistorial();
@@ -230,6 +267,14 @@
         let actual = localStorage.getItem(getClaveMeta()) || 42000;
         let nueva = prompt("Nueva meta mensual individual:", actual);
         if (nueva && !isNaN(nueva)) { localStorage.setItem(getClaveMeta(), nueva); actualizar(); }
+    }
+
+    function modificarReparaciones(cambio) {
+        let actuales = parseInt(localStorage.getItem(getClaveReparaciones())) || 0;
+        actuales += cambio;
+        if (actuales < 0) actuales = 0; 
+        localStorage.setItem(getClaveReparaciones(), actuales);
+        actualizar();
     }
 
     function addVenta() {
@@ -265,11 +310,9 @@
         actualizar();
     }
 
-    // --- NUEVO: CONFIGURACIÓN FILTROS DINÁMICOS DE HISTORIAL ---
     function configurarFiltrosHistorial() {
         const mesSelText = document.getElementById('mesSel').options[document.getElementById('mesSel').selectedIndex].text;
-        const filtroMes = document.getElementById('filtroMes');
-        filtroMes.innerHTML = `<option value="todos">Todo ${mesSelText}</option>`;
+        document.getElementById('filtroMes').innerHTML = `<option value="todos">Todo ${mesSelText}</option>`;
         
         const filtroDia = document.getElementById('filtroDia');
         filtroDia.innerHTML = '<option value="todos">Todos los días</option>';
@@ -288,15 +331,23 @@
         const tbody = document.querySelector('#tabla tbody');
         tbody.innerHTML = "";
 
-        // Filtrar registros
         let registrosFiltrados = data;
+        let sumaDiaVenta = 0;
+        let sumaDiaCom = 0;
+
         if (diaBuscado !== "todos") {
-            const fechaFiltroCompleta = `${yearActual}-${mesActual}-${diaBuscado}`;
-            registrosFiltrados = data.filter(i => i.f === fechaFiltroCompleta);
+            const fechaFiltro = `${yearActual}-${mesActual}-${diaBuscado}`;
+            registrosFiltrados = data.filter(i => i.f === fechaFiltro);
         }
 
         registrosFiltrados.sort((a,b) => new Date(b.f) - new Date(a.f)).forEach(i => {
             const fechaCortada = i.f.split('-').reverse().slice(0,2).join('/');
+            
+            if (diaBuscado !== "todos") {
+                sumaDiaVenta += (i.v || 0);
+                sumaDiaCom += (i.comision || 0);
+            }
+
             tbody.innerHTML += `<tr>
                 <td style="color:var(--text-sec); font-weight:600;">${fechaCortada}</td>
                 <td>
@@ -306,6 +357,20 @@
                 <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px;">X</button></td>
             </tr>`;
         });
+
+        // Fila Especial de Totales por Día
+        if (diaBuscado !== "todos" && registrosFiltrados.length > 0) {
+            tbody.innerHTML += `
+                <tr style="background: rgba(255, 159, 10, 0.15); border-top: 2px solid var(--accent);">
+                    <td style="color:var(--accent); font-weight:800; padding:15px 5px;">TOTAL</td>
+                    <td style="padding:15px 5px;">
+                        <div class="historial-title">Meta: $${sumaDiaVenta.toLocaleString()}</div>
+                        <div class="historial-sub" style="color:var(--green); font-weight:bold;">Comisiones: $${sumaDiaCom.toLocaleString()}</div>
+                    </td>
+                    <td></td>
+                </tr>
+            `;
+        }
     }
 
     function actualizar() {
@@ -314,42 +379,62 @@
         document.getElementById('metaTxt').innerText = metaActual.toLocaleString();
 
         const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
+        const reparaciones = parseInt(localStorage.getItem(getClaveReparaciones())) || 0;
+        document.getElementById('reparaciones-count').innerText = reparaciones;
+        const valorReparaciones = reparaciones * 600;
         
-        // El total logrado es la venta bruta registrada con IVA
-        const totalConIva = data.reduce((acc, i) => acc + (i.v || 0), 0);
-        const totalComisiones = data.reduce((acc, i) => acc + (i.comision || 0), 0);
+        // Sumatorias Base
+        let totalServicios = data.reduce((acc, i) => acc + (i.v || 0), 0);
+        let totalComisiones = data.reduce((acc, i) => acc + (i.comision || 0), 0);
         
-        // CORRECCIÓN MATEMÁTICA: Si el valor de meta ya tiene IVA, el valor sin IVA es dividido entre 1.16
+        // El total con IVA incluye lo vendido + las reparaciones
+        const totalConIva = totalServicios + valorReparaciones;
         const totalSinIva = totalConIva / 1.16;
 
-        // Indicadores superiores
-        document.getElementById('comisionesTxt').innerText = "$" + totalComisiones.toLocaleString();
-        const vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + (i.v || 0), 0);
-        const vHoyTxt = document.getElementById('v-hoy');
-        vHoyTxt.innerText = "$" + vendidoHoy.toLocaleString();
-        vHoyTxt.style.color = vendidoHoy > 0 ? "var(--green)" : "var(--text)";
+        // Venta del día de hoy
+        let vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + (i.v || 0), 0);
+        // Nota: Las reparaciones no tienen fecha diaria registrada, por ende solo suben al global.
 
-        // Barra de progreso calculada sobre la meta bruta (Con IVA)
+        // Top Cards
+        document.getElementById('comisionesTxt').innerText = "$" + totalComisiones.toLocaleString();
+        document.getElementById('v-hoy').innerText = "$" + vendidoHoy.toLocaleString();
+        document.getElementById('v-hoy').style.color = vendidoHoy > 0 ? "var(--green)" : "var(--text)";
+
+        // Barra de progreso 
         const porc = (totalConIva / metaActual) * 100;
         document.getElementById('barra').style.width = Math.min(porc, 100) + "%";
 
-        // Actualizar Recuadro del Resumen
+        // Cuadro Resumen
         document.getElementById('sum-con-iva').innerText = "$" + totalConIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('sum-sin-iva').innerText = "$" + totalSinIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('sum-comisiones').innerText = "$" + totalComisiones.toLocaleString();
 
-        // Refrescar la visualización del historial usando el filtro actual
+        // Llenar tabla de conteo (Estadísticas)
+        const tbodyEst = document.querySelector('#tabla-estadisticas tbody');
+        tbodyEst.innerHTML = "";
+        const conteo = {};
+        data.forEach(i => { conteo[i.nombre] = (conteo[i.nombre] || 0) + 1; });
+        
+        for (const [nom, cant] of Object.entries(conteo)) {
+            tbodyEst.innerHTML += `<tr><td>${nom}</td><td style="text-align:right"><b>${cant}</b></td></tr>`;
+        }
+        if(Object.keys(conteo).length === 0) {
+            tbodyEst.innerHTML = `<tr><td colspan="2" style="text-align:center; color:var(--text-sec)">Sin registros este mes</td></tr>`;
+        }
+
         filtrarHistorial();
     }
 
     function switchTab(t) {
         document.getElementById('control').classList.toggle('hidden', t !== 'control');
         document.getElementById('historial').classList.toggle('hidden', t !== 'historial');
+        document.getElementById('estadisticas').classList.toggle('hidden', t !== 'estadisticas');
+        
         document.getElementById('t-control').classList.toggle('active', t === 'control');
         document.getElementById('t-historial').classList.toggle('active', t === 'historial');
+        document.getElementById('t-estadisticas').classList.toggle('active', t === 'estadisticas');
     }
 
-    // Inicializar filtros e interfaz
     configurarFiltrosHistorial();
     actualizar();
 </script>
