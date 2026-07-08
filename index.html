@@ -11,7 +11,6 @@
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/10384/10384160.png">
 
     <style>
-        /* Variables automáticas: Se adaptan si el iPhone está en modo claro u oscuro */
         :root {
             --bg: #000000; --card: #1C1C1E; --accent: #FF9F0A;
             --green: #30D158; --red: #FF453A; --blue: #0A84FF;
@@ -45,11 +44,11 @@
             margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
-        .stats-top { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; text-align: center; }
-        .stats-top > div { background: var(--border); padding: 10px 4px; border-radius: 12px; }
+        .stats-top { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; text-align: center; }
+        .stats-top > div { background: var(--border); padding: 12px 4px; border-radius: 12px; }
 
         .label { font-size: 10px; color: var(--text-sec); text-transform: uppercase; margin-bottom: 4px; font-weight: 700; letter-spacing: 0.5px; }
-        .value-small { font-size: 15px; font-weight: 800; }
+        .value-small { font-size: 16px; font-weight: 800; }
         
         .editable { border-bottom: 1px dashed var(--text-sec); color: var(--accent); }
 
@@ -60,7 +59,6 @@
             display: block; -webkit-appearance: none;
         }
 
-        /* Feedback Háptico / Visual en Botones */
         button { active-transform: scale(0.96); transition: transform 0.1s ease; }
         button:active { transform: scale(0.96) !important; }
 
@@ -70,18 +68,16 @@
             box-shadow: 0 4px 10px rgba(255, 159, 10, 0.3);
         }
 
-        /* Barra de progreso de colores dinámicos */
         .progress-container { height: 10px; background: var(--border); border-radius: 10px; margin: 8px 0 16px 0; overflow: hidden; }
         .progress-bar { height: 100%; width: 0%; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1), background-color: 0.4s; }
         
-        /* Estados de la barra */
         .bg-red { background: var(--red); }
         .bg-orange { background: var(--accent); }
         .bg-green { background: linear-gradient(90deg, #249746, var(--green)); box-shadow: 0 0 8px var(--green); }
 
         .summary-box { background: var(--border); border-radius: 12px; padding: 14px; }
         .summary-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; font-weight: 600; }
-        .summary-row:last-child { margin-bottom: 0; padding-top: 10px; border-top: 1px solid var(--bg); color: var(--green); font-size: 14px; }
+        .summary-row:last-child { margin-bottom: 0; padding-top: 10px; border-top: 1px solid var(--bg); color: var(--text); font-size: 14px; }
 
         .tabs { display: flex; gap: 6px; margin-bottom: 14px; background: var(--border); padding: 4px; border-radius: 12px; }
         .tab { flex: 1; padding: 10px 2px; border-radius: 10px; border: none; background: transparent; color: var(--text-sec); font-size: 13px; font-weight: 700; }
@@ -138,11 +134,7 @@
         </div>
         <div>
             <div class="label">Vendido Hoy</div>
-            <div class="value-small" id="v-hoy">$0</div>
-        </div>
-        <div>
-            <div class="label">Comisiones</div>
-            <div class="value-small" id="comisionesTxt" style="color: var(--green)">$0</div>
+            <div class="value-small" id="v-hoy" style="color: var(--green)">$0</div>
         </div>
     </div>
 
@@ -185,10 +177,8 @@
                     <span>Total Venta (Sin 16% IVA):</span>
                     <span id="sum-sin-iva" style="color: var(--text);">$0</span>
                 </div>
-                <div class="summary-row">
-                    <span>Comisiones Totales (Aprox):</span>
-                    <span id="sum-comisiones">$0</span>
-                </div>
+                
+                <button class="secondary-btn" style="margin-top: 15px; border-color: var(--green); color: var(--green);" onclick="verComisiones()">💰 Calcular mis Comisiones</button>
             </div>
         </div>
     </div>
@@ -244,6 +234,7 @@
             servicios: [
                 { nombre: "Configuraciones IOS", valor: 1229, comision: 45 },
                 { nombre: "Restauración / Actualizacion IOS", valor: 1229, comision: 45 },
+                { nombre: "Restauración / actualización MacOS", valor: 2089, comision: 45 },
                 { nombre: "Membresía SPA", valor: 2090, comision: 140 },
                 { nombre: "Membresía Personal", valor: 3999, comision: 215 },
                 { nombre: "Limpieza AirPods", valor: 919, comision: 15 },
@@ -266,8 +257,8 @@
         
         catalogo[cat].servicios.forEach((s, index) => {
             let label = `${s.nombre}`;
+            // Ocultamos la mención de la comisión en el selector
             if(s.valor > 0) label += ` (+$${s.valor.toLocaleString()})`;
-            else if(s.comision > 0) label += ` (+Comisión)`;
             servSelect.innerHTML += `<option value="${index}">${label}</option>`;
         });
     }
@@ -278,7 +269,6 @@
         return (new Date(d - offset)).toISOString().split('T')[0];
     }
 
-    // Inicializar Fechas de Hoy
     document.getElementById('f-in').value = getFechaLocal();
     const currentMonth = new Date().getMonth() + 1;
     document.getElementById('mesSel').value = currentMonth < 10 ? '0' + currentMonth : currentMonth;
@@ -365,7 +355,6 @@
 
         let registrosFiltrados = data;
         let sumaDiaVenta = 0;
-        let sumaDiaCom = 0;
 
         if (diaBuscado !== "todos") {
             const fechaFiltro = `${yearActual}-${mesActual}-${diaBuscado}`;
@@ -377,14 +366,13 @@
             
             if (diaBuscado !== "todos") {
                 sumaDiaVenta += (i.v || 0);
-                sumaDiaCom += (i.comision || 0);
             }
 
             tbody.innerHTML += `<tr>
                 <td style="color:var(--text-sec); font-weight:700;">${fechaCortada}</td>
                 <td>
                     <div class="historial-title">${i.nombre}</div>
-                    <div class="historial-sub">Suma: $${i.v.toLocaleString()} <span style="color:var(--green)">| Com: $${i.comision.toLocaleString()}</span></div>
+                    <div class="historial-sub">Suma a Meta: $${i.v.toLocaleString()}</div>
                 </td>
                 <td style="text-align:right"><button onclick="borrar(${i.id})" style="color:var(--red); border:none; background:none; font-size:16px; font-weight:bold; padding:5px 10px;">✕</button></td>
             </tr>`;
@@ -396,7 +384,6 @@
                     <td style="color:var(--green); font-weight:800; padding:15px 5px;">TOTAL</td>
                     <td style="padding:15px 5px;" colspan="2">
                         <div class="historial-title" style="color:var(--text)">Meta Alcanzada: $${sumaDiaVenta.toLocaleString()}</div>
-                        <div class="historial-sub" style="color:var(--green); font-weight:bold; font-size:12px;">Comisiones del Día: $${sumaDiaCom.toLocaleString()}</div>
                     </td>
                 </tr>
             `;
@@ -416,41 +403,33 @@
         const valorReparaciones = reparaciones * 600;
         
         let totalServicios = data.reduce((acc, i) => acc + (i.v || 0), 0);
-        let totalComisiones = data.reduce((acc, i) => acc + (i.comision || 0), 0);
         
         const totalConIva = totalServicios + valorReparaciones;
         const totalSinIva = totalConIva / 1.16;
 
         let vendidoHoy = data.filter(i => i.f === hoyLocal).reduce((acc, i) => acc + (i.v || 0), 0);
 
-        document.getElementById('comisionesTxt').innerText = "$" + totalComisiones.toLocaleString();
         document.getElementById('v-hoy').innerText = "$" + vendidoHoy.toLocaleString();
         document.getElementById('v-hoy').style.color = vendidoHoy > 0 ? "var(--green)" : "var(--text)";
 
-        // --- DISEÑO: BARRA DE PROGRESO DINÁMICA ---
         const porc = metaActual > 0 ? (totalConIva / metaActual) * 100 : 0;
         const barra = document.getElementById('barra');
         document.getElementById('porcentaje-txt').innerText = Math.round(porc) + "%";
         barra.style.width = Math.min(porc, 100) + "%";
         
-        barra.className = "progress-bar"; // Resetear clases
+        barra.className = "progress-bar"; 
         if(porc <= 35) { barra.classList.add('bg-red'); }
         else if(porc <= 74) { barra.classList.add('bg-orange'); }
         else { barra.classList.add('bg-green'); }
 
-        // Totales Económicos
         document.getElementById('sum-con-iva').innerText = "$" + totalConIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('sum-sin-iva').innerText = "$" + totalSinIva.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        document.getElementById('sum-comisiones').innerText = "$" + totalComisiones.toLocaleString();
 
-        // Tabla de Volumen Dinámico (Estadísticas)
         const tbodyEst = document.querySelector('#tabla-estadisticas tbody');
         tbodyEst.innerHTML = "";
         const conteo = {};
         
-        // Contar servicios del catálogo clásico
         data.forEach(i => { conteo[i.nombre] = (conteo[i.nombre] || 0) + 1; });
-        // Agregar de forma manual las reparaciones si existen
         if (reparaciones > 0) { conteo["Reparaciones Técnicos ($600)"] = reparaciones; }
         
         for (const [nom, cant] of Object.entries(conteo)) {
@@ -463,14 +442,22 @@
         filtrarHistorial();
     }
 
-    // --- FUNCIONAMIENTO: EXPORTAR A EXCEL (CSV) ---
+    // --- NUEVO: FUNCIÓN PARA VER COMISIONES ---
+    function verComisiones() {
+        const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
+        const totalComisiones = data.reduce((acc, i) => acc + (i.comision || 0), 0);
+        
+        alert(`💰 Tus comisiones acumuladas (mes seleccionado) son de aprox:\n\n$${totalComisiones.toLocaleString()} MXN`);
+    }
+
     function exportarExcel() {
         const data = JSON.parse(localStorage.getItem(getClaveVentas())) || [];
         if(data.length === 0) { alert("No hay datos para exportar en este mes."); return; }
         
-        let csvContent = "\uFEFFFecha,Servicio,Suma a Meta (Con IVA),Comision\n";
+        // Eliminada la columna de comisiones
+        let csvContent = "\uFEFFFecha,Servicio,Suma a Meta (Con IVA)\n";
         data.forEach(i => {
-            csvContent += `${i.f},"${i.nombre}",${i.v},${i.comision}\n`;
+            csvContent += `${i.f},"${i.nombre}",${i.v}\n`;
         });
         
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -484,7 +471,6 @@
         document.body.removeChild(link);
     }
 
-    // --- FUNCIONAMIENTO: ZONA DE RESPALDOS ---
     function generarBackup() {
         const clave = getClaveVentas();
         const ventas = localStorage.getItem(clave) || "[]";
@@ -525,7 +511,6 @@
         document.getElementById('t-estadisticas').classList.toggle('active', t === 'estadisticas');
     }
 
-    // Arrancar aplicación
     configurarFiltrosHistorial();
     actualizar();
 </script>
